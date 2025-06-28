@@ -1,151 +1,401 @@
-import { useState, useEffect } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
+import React, { useState, useEffect } from "react";
+import Layout from "./Layout";
+import HabitPanel from "./HabitPanel";
+import HabitForm from "./HabitForm";
+import HabitChart from "./HabitChart";
+import LogHistory from "./LogHistory";
+import Toast from "./Toast";
 import "./App.css";
 
-export default function App() {
-  const [entries, setEntries] = useState(() => {
-    const stored = localStorage.getItem("habitData");
-    return stored ? JSON.parse(stored) : [];
-  });
+function App() {
+  const [habits, setHabits] = useState([]);
+  const [activeHabit, setActiveHabit] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [viewMode, setViewMode] = useState("chart"); // 'chart', 'heatmap', 'circular'
 
-  const [count, setCount] = useState("");
-  const [date, setDate] = useState(
-    () => new Date().toISOString().split("T")[0]
-  );
-
+  // Load habits from localStorage on component mount
   useEffect(() => {
-    localStorage.setItem("habitData", JSON.stringify(entries));
-  }, [entries]);
+    const savedHabits = localStorage.getItem("trace-habits-v1");
+    if (savedHabits) {
+      try {
+        const parsed = JSON.parse(savedHabits);
+
+        // Handle migration from old data structure
+        if (parsed.habits && Array.isArray(parsed.habits)) {
+          // Old structure: { habits: [...] }
+          const migratedHabits = parsed.habits.map((habit) => ({
+            id: habit.id,
+            name: habit.habitName || habit.name || "Untitled Habit",
+            logs: (habit.entries || habit.logs || []).map((entry) => ({
+              date: entry.date,
+              count: entry.count,
+              reflection: entry.reflection || "",
+            })),
+          }));
+          setHabits(migratedHabits);
+          if (migratedHabits.length > 0) {
+            setActiveHabit(migratedHabits[0]);
+          }
+        } else if (Array.isArray(parsed)) {
+          // New structure: [...]
+          setHabits(parsed);
+          if (parsed.length > 0) {
+            setActiveHabit(parsed[0]);
+          }
+        } else {
+          // Invalid structure, create default
+          createDefaultHabit();
+        }
+      } catch (error) {
+        console.error("Failed to parse stored data:", error);
+        createDefaultHabit();
+      }
+    } else {
+      // No data exists, create default habit
+      createDefaultHabit();
+    }
+  }, []);
+
+  const createDefaultHabit = () => {
+    const today = new Date();
+    const format = (d) => d.toISOString().split("T")[0];
+
+    // Generate realistic mock data for the last 30 days
+    const generateMockLogs = (habitName, pattern) => {
+      const logs = [];
+      const reflections = [
+        "Focused and productive session today. Building momentum.",
+        "Pushed through resistance and made significant progress.",
+        "Excellent consistency - the compound effect is real.",
+        "Quick but effective session. Quality over quantity.",
+        "In the zone today - breakthrough moment achieved.",
+        "Managed to complete despite busy schedule. Adaptability wins.",
+        "Strong performance - feeling the benefits of consistency.",
+        "Adapted strategy due to external factors. Flexibility key.",
+        "Consistent effort paying dividends. Trust the process.",
+        "Challenging day but stayed committed to growth.",
+        "Major breakthrough! The work is compounding.",
+        "Steady progress - sustainable growth over time.",
+        "Highly motivated and inspired today.",
+        "Pushed beyond comfort zone. Growth mindset activated.",
+        "Recovery day with lighter intensity. Smart training.",
+        "Building foundational habits for long-term success.",
+        "Focused on quality and precision over volume.",
+        "Exceptional energy and focus throughout.",
+        "Successfully adapted to unexpected changes.",
+        "Tangible benefits becoming evident now.",
+        "Consistency is the key to mastery.",
+        "Pushed through mental barriers today.",
+        "Celebrating incremental progress and wins.",
+        "Learning from setbacks - growth mindset.",
+        "Building unstoppable momentum daily.",
+        "Process-focused approach yielding results.",
+        "Trusting the journey and staying patient.",
+        "Every session contributes to the bigger picture.",
+        "Committed to continuous improvement.",
+        "Progress over perfection - sustainable growth.",
+      ];
+
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = format(date);
+
+        let count = 0;
+        let hasData = false;
+
+        // Different patterns for different habits
+        switch (pattern) {
+          case "consistent":
+            // Consistent daily habit with some variation
+            if (Math.random() > 0.1) {
+              // 90% completion rate
+              count = Math.floor(Math.random() * 3) + 3; // 3-5 range
+              hasData = true;
+            }
+            break;
+          case "intensive":
+            // Intensive habit with higher counts but some rest days
+            if (Math.random() > 0.15) {
+              // 85% completion rate
+              count = Math.floor(Math.random() * 4) + 6; // 6-9 range
+              hasData = true;
+            }
+            break;
+          case "building":
+            // Building habit - starts low, increases over time
+            if (i < 20 && Math.random() > 0.2) {
+              // More recent days, 80% completion
+              count = Math.floor(Math.random() * 2) + 1; // 1-2 range
+              hasData = true;
+            }
+            break;
+          case "streak":
+            // Streak-based habit with some gaps
+            if (i % 3 !== 0 && Math.random() > 0.1) {
+              // Skip every 3rd day, 90% of remaining
+              count = Math.floor(Math.random() * 3) + 2; // 2-4 range
+              hasData = true;
+            }
+            break;
+        }
+
+        if (hasData) {
+          logs.push({
+            date: dateStr,
+            count,
+            reflection:
+              reflections[Math.floor(Math.random() * reflections.length)],
+          });
+        }
+      }
+
+      return logs;
+    };
+
+    const mockHabits = [
+      {
+        id: "h1",
+        name: "Morning Meditation",
+        logs: generateMockLogs("Morning Meditation", "consistent"),
+      },
+      {
+        id: "h2",
+        name: "Deep Work Sessions",
+        logs: generateMockLogs("Deep Work Sessions", "intensive"),
+      },
+      {
+        id: "h3",
+        name: "Daily Exercise",
+        logs: generateMockLogs("Daily Exercise", "building"),
+      },
+      {
+        id: "h4",
+        name: "Reading & Learning",
+        logs: generateMockLogs("Reading & Learning", "streak"),
+      },
+      {
+        id: "h5",
+        name: "Network Building",
+        logs: generateMockLogs("Network Building", "consistent"),
+      },
+    ];
+
+    setHabits(mockHabits);
+    setActiveHabit(mockHabits[0]);
+  };
+
+  // Save habits to localStorage whenever habits change
+  useEffect(() => {
+    if (habits.length > 0) {
+      localStorage.setItem("trace-habits-v1", JSON.stringify(habits));
+    }
+  }, [habits]);
+
+  const addHabit = (name) => {
+    const newHabit = {
+      id: Date.now().toString(),
+      name,
+      logs: [],
+    };
+    const updatedHabits = [...habits, newHabit];
+    setHabits(updatedHabits);
+    setActiveHabit(newHabit);
+    setTimeout(() => {
+      document
+        .querySelector(".dashboard-left-panel")
+        .scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const logHabit = (habitId, logData) => {
+    const updatedHabits = habits.map((habit) => {
+      if (habit.id === habitId) {
+        const existingLogIndex = habit.logs.findIndex(
+          (log) => log.date === logData.date
+        );
+        if (existingLogIndex !== -1) {
+          const updatedLogs = [...habit.logs];
+          updatedLogs[existingLogIndex] = logData;
+          return { ...habit, logs: updatedLogs };
+        } else {
+          return { ...habit, logs: [...habit.logs, logData] };
+        }
+      }
+      return habit;
+    });
+    setHabits(updatedHabits);
+    setActiveHabit(updatedHabits.find((h) => h.id === habitId));
+    setToast({
+      message: `Logged ${logData.count} ${activeHabit?.name}`,
+      type: "success",
+    });
+    setTimeout(() => {
+      const el = document.querySelector(".history-card");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 200);
+  };
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+  };
+
+  const closeToast = () => {
+    setToast(null);
+  };
+
+  const resetToMockData = () => {
+    createDefaultHabit();
+    setToast({
+      message: "Reset to mock data successfully",
+      type: "success",
+    });
+  };
+
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+  };
 
   // Calculate current streak
-  function getStreak(entries) {
-    if (!entries.length) return 0;
-    const sorted = [...entries].sort((a, b) => b.date.localeCompare(a.date));
+  const calculateStreak = () => {
+    if (!activeHabit || !activeHabit.logs.length) return 0;
+
+    const sortedLogs = [...activeHabit.logs].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
     let streak = 0;
-    let current = new Date(sorted[0].date);
-    for (let i = 0; i < sorted.length; i++) {
-      const entryDate = new Date(sorted[i].date);
-      if (entryDate.toDateString() === current.toDateString()) {
+    let currentDate = new Date();
+
+    for (const log of sortedLogs) {
+      const logDate = new Date(log.date);
+      const daysDiff = Math.floor(
+        (currentDate - logDate) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysDiff === streak) {
         streak++;
-        current.setDate(current.getDate() - 1);
       } else {
         break;
       }
     }
+
     return streak;
-  }
-
-  const streak = getStreak(entries);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!count || !date) return;
-    const existing = entries.find((e) => e.date === date);
-    let newEntries;
-    if (existing) {
-      newEntries = entries.map((e) =>
-        e.date === date ? { ...e, count: parseInt(count) } : e
-      );
-    } else {
-      newEntries = [...entries, { date, count: parseInt(count) }];
-    }
-    setEntries(newEntries);
-    setCount("");
-    setDate(new Date().toISOString().split("T")[0]);
   };
 
-  // Sort entries by date ascending for table and chart
-  const sortedEntries = [...entries].sort((a, b) =>
-    a.date.localeCompare(b.date)
-  );
+  const currentStreak = calculateStreak();
+
+  // Set document title
+  useEffect(() => {
+    document.title = "TRACE - Professional Habit Tracking & Analytics";
+  }, []);
+
+  useEffect(() => {
+    // If activeHabit has less than 5 logs, inject mock logs for look & feel
+    if (activeHabit && activeHabit.logs.length < 5) {
+      const today = new Date();
+      const format = (d) => d.toISOString().split("T")[0];
+
+      // Generate realistic mock logs for the last 30 days
+      const generateMockLogs = (habitName) => {
+        const logs = [];
+        const reflections = [
+          "Focused and productive session today. Building momentum.",
+          "Pushed through resistance and made significant progress.",
+          "Excellent consistency - the compound effect is real.",
+          "Quick but effective session. Quality over quantity.",
+          "In the zone today - breakthrough moment achieved.",
+          "Managed to complete despite busy schedule. Adaptability wins.",
+          "Strong performance - feeling the benefits of consistency.",
+          "Adapted strategy due to external factors. Flexibility key.",
+          "Consistent effort paying dividends. Trust the process.",
+          "Challenging day but stayed committed to growth.",
+          "Major breakthrough! The work is compounding.",
+          "Steady progress - sustainable growth over time.",
+          "Highly motivated and inspired today.",
+          "Pushed beyond comfort zone. Growth mindset activated.",
+          "Recovery day with lighter intensity. Smart training.",
+          "Building foundational habits for long-term success.",
+          "Focused on quality and precision over volume.",
+          "Exceptional energy and focus throughout.",
+          "Successfully adapted to unexpected changes.",
+          "Tangible benefits becoming evident now.",
+          "Consistency is the key to mastery.",
+          "Pushed through mental barriers today.",
+          "Celebrating incremental progress and wins.",
+          "Learning from setbacks - growth mindset.",
+          "Building unstoppable momentum daily.",
+          "Process-focused approach yielding results.",
+          "Trusting the journey and staying patient.",
+          "Every session contributes to the bigger picture.",
+          "Committed to continuous improvement.",
+          "Progress over perfection - sustainable growth.",
+        ];
+
+        for (let i = 29; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          const dateStr = format(date);
+
+          // Generate realistic pattern
+          if (Math.random() > 0.15) {
+            // 85% completion rate
+            const count = Math.floor(Math.random() * 4) + 2; // 2-5 range
+            logs.push({
+              date: dateStr,
+              count,
+              reflection:
+                reflections[Math.floor(Math.random() * reflections.length)],
+            });
+          }
+        }
+
+        return logs;
+      };
+
+      const mockLogs = generateMockLogs(activeHabit.name);
+      setHabits(
+        habits.map((h) =>
+          h.id === activeHabit.id ? { ...h, logs: mockLogs } : h
+        )
+      );
+    }
+  }, [activeHabit]);
 
   return (
-    <div className="container">
-      <div className="gold-line" aria-hidden="true"></div>
-      <h1 className="title">Habit System Tracker</h1>
-      <div className="subtitle">
-        Leverage clarity. Build legacy. Impact through systems, not streaks.
-      </div>
-      <div className="streak-bar">
-        Current System Streak: <span className="streak-count">{streak}</span>{" "}
-        day{streak !== 1 ? "s" : ""}
-      </div>
-      <form onSubmit={handleSubmit} className="form">
-        <input
-          type="date"
-          className="input input-date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          max={new Date().toISOString().split("T")[0]}
+    <Layout currentStreak={currentStreak}>
+      {/* MainGrid: 2-column dashboard layout (see Layout.jsx) */}
+      {/* LeftPanel: Logging panel (form, streak badge) */}
+      <div className="dashboard-left-panel">
+        <HabitPanel
+          habits={habits}
+          activeHabit={activeHabit}
+          onHabitSelect={setActiveHabit}
+          onAddHabit={addHabit}
         />
-        <input
-          type="number"
-          className="input"
-          value={count}
-          onChange={(e) => setCount(e.target.value)}
-          placeholder="How many videos?"
-          min="0"
-        />
-        <button type="submit" className="button">
-          Add / Edit
-        </button>
-      </form>
-      <div className="data-row">
-        <div className="table-wrap">
-          {sortedEntries.length === 0 ? (
-            <div className="empty-state">
-              <div
-                className="gold-line"
-                style={{ margin: "2rem auto 1.5rem auto" }}
-                aria-hidden="true"
-              ></div>
-              <div className="empty-headline">Begin Your System</div>
-              <div className="empty-message">
-                Leverage clarity. Add your first entry to start building your
-                legacy.
-              </div>
-            </div>
-          ) : (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Videos</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedEntries.map((e, i) => (
-                  <tr key={i}>
-                    <td>{e.date}</td>
-                    <td>{e.count}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-        <div className="chart">
-          <LineChart width={300} height={300} data={sortedEntries}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="count"
-              stroke="#D4AF37"
-              strokeWidth={2}
-            />
-          </LineChart>
+        <div style={{ position: "relative" }}>
+          {/* Streak badge in top-right of form card */}
+          <div className="streak-badge-floating">
+            <span className="streak-count">{currentStreak}</span>
+            <span className="streak-label">day streak</span>
+          </div>
+          <HabitForm habit={activeHabit} onLogHabit={logHabit} />
         </div>
       </div>
-    </div>
+      {/* RightPanel: Charts, streaks, recent activity */}
+      <div className="dashboard-right-panel">
+        <HabitChart
+          habit={activeHabit}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+        />
+        <LogHistory habit={activeHabit} />
+      </div>
+      {/* Toast Notifications */}
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+      )}
+    </Layout>
   );
 }
+
+export default App;
