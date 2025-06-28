@@ -156,28 +156,28 @@ function App() {
     const mockHabits = [
       {
         id: "h1",
-        name: "Morning Meditation",
-        logs: generateMockLogs("Morning Meditation", "consistent"),
+        name: "Strategic Planning",
+        logs: generateMockLogs("Strategic Planning", "consistent"),
       },
       {
         id: "h2",
-        name: "Deep Work Sessions",
-        logs: generateMockLogs("Deep Work Sessions", "intensive"),
+        name: "Revenue Generation",
+        logs: generateMockLogs("Revenue Generation", "intensive"),
       },
       {
         id: "h3",
-        name: "Daily Exercise",
-        logs: generateMockLogs("Daily Exercise", "building"),
+        name: "Team Leadership",
+        logs: generateMockLogs("Team Leadership", "building"),
       },
       {
         id: "h4",
-        name: "Reading & Learning",
-        logs: generateMockLogs("Reading & Learning", "streak"),
+        name: "Market Research",
+        logs: generateMockLogs("Market Research", "streak"),
       },
       {
         id: "h5",
-        name: "Network Building",
-        logs: generateMockLogs("Network Building", "consistent"),
+        name: "Investor Relations",
+        logs: generateMockLogs("Investor Relations", "consistent"),
       },
     ];
 

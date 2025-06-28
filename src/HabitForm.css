@@ -4,11 +4,13 @@
 }
 
 .form-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  background: #1a1a1a;
+  border: 1px solid var(--border, #232323);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 16px 0 rgb(0 0 0 / 0.3);
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding-top: 3rem;
+  color: #f5f5f5;
 }
 
 .form-header {
@@ -196,9 +198,12 @@
     max-width: none;
   }
 
+  .form-card {
+    padding-top: 2.5rem;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
-    gap: 1rem;
   }
 
   .form-title {
@@ -219,6 +224,10 @@
 @media (max-width: 480px) {
   .form-header {
     margin-bottom: 1.25rem;
+  }
+
+  .form-card {
+    padding-top: 2.25rem;
   }
 
   .count-input {
