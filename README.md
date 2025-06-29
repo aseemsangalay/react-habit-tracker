@@ -1,92 +1,53 @@
-# TRACE - Professional Habit Tracking & Analytics
+# TRACE
 
-A modern, data-driven habit tracking application designed for high-performing individuals and teams. TRACE combines elegant design with powerful analytics to help users build sustainable habits and achieve their goals.
+> Track clarity. Reflect growth. Compound legacy.
 
-## 🚀 Features
+A minimal habit tracker for builders who want to see their progress, not their dopamine hits.
 
-### Core Functionality
+## 🔍 What It Does
 
-- **Multi-Habit Tracking**: Track multiple habits simultaneously with detailed progress logging
-- **Advanced Visualizations**: Three distinct chart modes (Bar, Heatmap, Circular) for comprehensive data analysis
-- **Reflection System**: Built-in journaling and reflection capabilities for deeper habit insights
-- **Real-time Analytics**: Live progress tracking with streak calculations and performance metrics
+- Track multiple habits (Meditation, Gym, Reading etc.)
+- Log how many reps/hours done per day
+- Visualize progress with minimal charts
+- Track streaks and consistency
+- Store your data locally — no accounts, no tracking
 
-### Professional Features
+## ✨ Why I Built This
 
-- **Clean, Modern UI**: Minimalist design optimized for focus and productivity
-- **Responsive Design**: Seamless experience across desktop, tablet, and mobile devices
-- **Data Persistence**: Local storage ensures your progress is never lost
-- **Performance Optimized**: Fast, smooth interactions with minimal loading times
+Most habit apps are either:
 
-### Target Market
+- Too basic (just checkboxes)
+- Or too gamified (dopamine-driven, not data-driven)
 
-- **Entrepreneurs & Executives**: Track business-building habits and productivity metrics
-- **Professionals**: Monitor career development, learning, and skill-building activities
-- **High-Performers**: Data-driven individuals seeking measurable habit improvement
-- **Teams & Organizations**: Potential for team habit tracking and accountability
+I wanted something that felt like a **tool for builders**, not a toy.
 
-## 🛠 Technology Stack
+TRACE helps me stay consistent with the habits that compound my long-term leverage — learning, thinking, building.
 
-- **Frontend**: React 18 with modern hooks and functional components
-- **Styling**: CSS3 with custom design system and responsive breakpoints
-- **Build Tool**: Vite for fast development and optimized production builds
-- **Deployment**: GitHub Pages for reliable hosting and easy updates
-
-## 📊 Market Opportunity
-
-The habit tracking market is experiencing significant growth, driven by:
-
-- Increased focus on personal development and productivity
-- Growing demand for data-driven wellness solutions
-- Remote work trends requiring better self-management tools
-- Corporate wellness programs seeking employee engagement solutions
-
-## 🎯 Competitive Advantages
-
-1. **Professional Focus**: Designed specifically for high-performing individuals
-2. **Advanced Analytics**: Multiple visualization modes for deeper insights
-3. **Clean Design**: Minimalist interface that doesn't distract from the core purpose
-4. **Scalable Architecture**: Built for easy feature expansion and customization
-5. **Data Privacy**: Local storage ensures user data remains private
-
-## 🚀 Getting Started
-
-### Development
+## 🛠 How to Use It
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Production Build
+## 🗺️ Roadmap
 
-```bash
-npm run build
-npm run preview
-```
+- Add daily reflection logging
+- Support for tags per habit
+- More charts: streak calendar, velocity graph
+- PWA / mobile experience
+- Export / import habits
 
-## 📈 Roadmap
+## �� Try It
 
-- [ ] Team collaboration features
-- [ ] Advanced goal setting and milestones
-- [ ] Integration with calendar and productivity tools
-- [ ] Mobile app development
-- [ ] Enterprise features and admin dashboard
-- [ ] API for third-party integrations
-
-## 💼 Investment Opportunity
-
-TRACE represents a compelling investment opportunity in the growing habit tracking and personal development market. The application demonstrates:
-
-- **Proven Market Demand**: Habit tracking apps are experiencing rapid adoption
-- **Scalable Business Model**: Potential for freemium, subscription, and enterprise pricing
-- **Technical Excellence**: Modern, maintainable codebase ready for rapid iteration
-- **Strong Product-Market Fit**: Focused on high-value professional users
-
-## 📞 Contact
-
-For investment inquiries or partnership opportunities, please reach out through the project repository.
+[Live Demo](https://aseemsangalay.github.io/react-habit-tracker/) • [GitHub Repo](https://github.com/aseemsangalay/react-habit-tracker/tree/main)
 
 ---
 
-_Built with ❤️ for high-performing individuals who believe in the power of consistent, measurable progress._
+Built with ❤️ for high-agency builders who ship.
+
+---
+
+🛡️ **Disclaimer**
+TRACE is a personal project built entirely on personal time and devices.
+It is not affiliated with or representative of my employer in any way.
