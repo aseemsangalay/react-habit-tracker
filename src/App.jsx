@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Layout from "./Layout";
 import HabitPanel from "./HabitPanel";
 import HabitForm from "./HabitForm";
@@ -12,17 +12,27 @@ function App() {
   const [activeHabit, setActiveHabit] = useState(null);
   const [toast, setToast] = useState(null);
   const [viewMode, setViewMode] = useState("chart"); // 'chart', 'heatmap', 'circular'
+  const [demoMode, setDemoMode] = useState(false);
+  const demoDataRef = useRef(null);
 
-  // Load habits from localStorage on component mount
+  // Load habits from localStorage or mock data based on demoMode
   useEffect(() => {
+    if (demoMode) {
+      // If mock data hasn't been generated yet, generate and store it
+      if (!demoDataRef.current) {
+        demoDataRef.current = createDefaultHabit(true); // return the mock data
+      }
+      const mockHabits = demoDataRef.current;
+      setHabits(mockHabits);
+      setActiveHabit(mockHabits[0]);
+      return;
+    }
+    // DEMO MODE OFF: Only load real data, never fallback to mock data
     const savedHabits = localStorage.getItem("trace-habits-v1");
     if (savedHabits) {
       try {
         const parsed = JSON.parse(savedHabits);
-
-        // Handle migration from old data structure
         if (parsed.habits && Array.isArray(parsed.habits)) {
-          // Old structure: { habits: [...] }
           const migratedHabits = parsed.habits.map((habit) => ({
             id: habit.id,
             name: habit.habitName || habit.name || "Untitled Habit",
@@ -35,28 +45,33 @@ function App() {
           setHabits(migratedHabits);
           if (migratedHabits.length > 0) {
             setActiveHabit(migratedHabits[0]);
+          } else {
+            setActiveHabit(null);
           }
         } else if (Array.isArray(parsed)) {
-          // New structure: [...]
           setHabits(parsed);
           if (parsed.length > 0) {
             setActiveHabit(parsed[0]);
+          } else {
+            setActiveHabit(null);
           }
         } else {
-          // Invalid structure, create default
-          createDefaultHabit();
+          setHabits([]);
+          setActiveHabit(null);
         }
       } catch (error) {
         console.error("Failed to parse stored data:", error);
-        createDefaultHabit();
+        setHabits([]);
+        setActiveHabit(null);
       }
     } else {
-      // No data exists, create default habit
-      createDefaultHabit();
+      setHabits([]);
+      setActiveHabit(null);
     }
-  }, []);
+  }, [demoMode]);
 
-  const createDefaultHabit = () => {
+  // If returnData is true, return the mock data instead of setting state
+  const createDefaultHabit = (returnData = false) => {
     const today = new Date();
     const format = (d) => d.toISOString().split("T")[0];
 
@@ -181,16 +196,20 @@ function App() {
       },
     ];
 
-    setHabits(mockHabits);
-    setActiveHabit(mockHabits[0]);
+    if (returnData) {
+      return mockHabits;
+    } else {
+      setHabits(mockHabits);
+      setActiveHabit(mockHabits[0]);
+    }
   };
 
-  // Save habits to localStorage whenever habits change
+  // Save habits to localStorage whenever habits change (only if not in demo mode)
   useEffect(() => {
-    if (habits.length > 0) {
+    if (!demoMode && habits.length > 0) {
       localStorage.setItem("trace-habits-v1", JSON.stringify(habits));
     }
-  }, [habits]);
+  }, [habits, demoMode]);
 
   const addHabit = (name) => {
     const newHabit = {
@@ -245,9 +264,9 @@ function App() {
   };
 
   const resetToMockData = () => {
-    createDefaultHabit();
+    setDemoMode(true);
     setToast({
-      message: "Reset to mock data successfully",
+      message: "Demo mode enabled with mock data",
       type: "success",
     });
   };
@@ -362,7 +381,12 @@ function App() {
   }, [activeHabit]);
 
   return (
-    <Layout currentStreak={currentStreak}>
+    <Layout
+      currentStreak={currentStreak}
+      demoMode={demoMode}
+      onToggleDemoMode={() => setDemoMode((d) => !d)}
+      onEnableDemoMode={resetToMockData}
+    >
       {/* MainGrid: 2-column dashboard layout (see Layout.jsx) */}
       {/* LeftPanel: Logging panel (form, streak badge) */}
       <div className="dashboard-left-panel">

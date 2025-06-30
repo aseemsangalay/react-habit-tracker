@@ -25,7 +25,13 @@ function getCurrentTime() {
   });
 }
 
-const Layout = ({ children, currentStreak = 0 }) => {
+const Layout = ({
+  children,
+  currentStreak = 0,
+  demoMode = false,
+  onToggleDemoMode,
+  onEnableDemoMode,
+}) => {
   const [todayString, setTodayString] = useState(getTodayString());
   const [currentTime, setCurrentTime] = useState(getCurrentTime());
 
@@ -55,6 +61,37 @@ const Layout = ({ children, currentStreak = 0 }) => {
             <div className="navbar-today">
               Today: {todayString} • {currentTime}
             </div>
+            {/* Demo Mode Pill/Button Logic */}
+            {demoMode ? (
+              <button
+                className="demo-pill demo-on"
+                onClick={onToggleDemoMode}
+                title="Click to turn off demo mode"
+                type="button"
+              >
+                Demo Mode: ON
+              </button>
+            ) : (
+              <button
+                className="demo-pill try-demo-btn"
+                onClick={onEnableDemoMode}
+                title="Try Demo with Mock Data"
+                type="button"
+              >
+                Try Demo
+              </button>
+            )}
+            <button
+              className="demo-pill clear-data-btn"
+              onClick={() => {
+                localStorage.removeItem("trace-habits-v1");
+                window.location.reload();
+              }}
+              title="Clear all saved habit data"
+              type="button"
+            >
+              Clear Data
+            </button>
             <button
               className="theme-toggle-btn"
               title="Toggle theme"
